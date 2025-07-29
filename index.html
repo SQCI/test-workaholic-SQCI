@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Eres Workaholic? - Autodiagnóstico</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header::before {
+            content: '⚠️';
+            font-size: 3rem;
+            position: absolute;
+            top: 15px;
+            left: 30px;
+            opacity: 0.3;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-left: 5px solid #3498db;
+            padding-left: 15px;
+        }
+        
+        .warning-signs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .sign-card {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .sign-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .sign-icon {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .sign-text {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.8rem;
+            line-height: 1.2;
+        }
+        
+        .test-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 20px 0;
+        }
+        
+        .test-title {
+            color: #e74c3c;
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .question {
+            background: white;
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 12px;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            font-size: 1.1rem;
+        }
+        
+        .consequences {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .consequence-card {
+            background: linear-gradient(135deg, #ff7675, #fd79a8);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        .consequence-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .tips {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            border-radius: 15px;
+            padding: 30px;
+            color: white;
+            margin-top: 30px;
+        }
+        
+        .tips h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .tip-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .tip-item {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .tip-item strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .score-result {
+            background: #e8f4fd;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            margin: 10px auto;
+            display: block;
+        }
+        
+        .test-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .pdf-button {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            margin: 10px auto;
+            display: block;
+        }
+        
+        .pdf-button:hover {
+            transform: scale(1.05);
+        }
+        
+        input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        
+        @media (max-width: 768px) {
+            .warning-signs {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .warning-signs {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>¿Eres Workaholic?</h1>
+            <p>Identifica si tienes adicción al trabajo</p>
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <h2 class="section-title">🚨 Señales de Alerta</h2>
+                <div class="warning-signs">
+                    <div class="sign-card">
+                        <div class="sign-icon">📱</div>
+                        <div class="sign-text">Revisas emails constantemente, incluso en vacaciones</div>
+                    </div>
+                    <div class="sign-card">
+                        <div class="sign-icon">🕐</div>
+                        <div class="sign-text">Trabajas más de 50 horas semanales regularmente</div>
+                    </div>
+                    <div class="sign-card">
+                        <div class="sign-icon">😰</div>
+                        <div class="sign-text">Sientes culpa o ansiedad cuando no trabajas</div>
+                    </div>
+                    <div class="sign-card">
+                        <div class="sign-icon">❌</div>
+                        <div class="sign-text">Cancelas planes personales por el trabajo frecuentemente</div>
+                    </div>
+                    <div class="sign-card">
+                        <div class="sign-icon">🏠</div>
+                        <div class="sign-text">Trabajas desde casa fuera del horario laboral</div>
+                    </div>
+                    <div class="sign-card">
+                        <div class="sign-icon">💭</div>
+                        <div class="sign-text">No puedes dejar de pensar en el trabajo</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="test-section">
+                <h3 class="test-title">✅ Test de Autodiagnóstico</h3>
+                <p style="text-align: center; margin-bottom: 20px;"><em>Marca las situaciones que se aplican a ti:</em></p>
+                
+                <div id="testQuestions">
+                    <div class="question">
+                        <input type="checkbox" id="q1" value="1">
+                        <label for="q1">Trabajo más horas de las requeridas habitualmente</label>
+                    </div>
+                    <div class="question">
+                        <input type="checkbox" id="q2" value="1">
+                        <label for="q2">Me resulta difícil relajarme cuando no estoy trabajando</label>
+                    </div>
+                    <div class="question">
+                        <input type="checkbox" id="q3" value="1">
+                        <label for="q3">Prefiero trabajar que socializar con amigos o familia</label>
+                    </div>
+                    <div class="question">
+                        <input type="checkbox" id="q4" value="1">
+                        <label for="q4">Me siento culpable cuando tomo descansos</label>
+                    </div>
+                    <div class="question">
+                        <input type="checkbox" id="q5" value="1">
+                        <label for="q5">Reviso emails de trabajo fuera del horario laboral</label>
+                    </div>
+                    <div class="question">
+                        <input type="checkbox" id="q6" value="1">
+                        <label for="q6">Mi familia se queja de que trabajo demasiado</label>
+                    </div>
+                    <div class="question">
+                        <input type="checkbox" id="q7" value="1">
+                        <label for="q7">Tengo dificultad para delegar tareas</label>
+                    </div>
+                    <div class="question">
+                        <input type="checkbox" id="q8" value="1">
+                        <label for="q8">Uso el trabajo para evitar pensar en problemas personales</label>
+                    </div>
+                </div>
+                
+                <button class="test-button" onclick="calculateScore()">Calcular Resultado</button>
+                
+                <div id="scoreResult" class="score-result hidden">
+                    <div id="scoreText"></div>
+                    <button class="pdf-button" onclick="generatePDF()" id="pdfButton" style="display: none;">
+                        📄 Descargar Resultado en PDF
+                    </button>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">💥 Consecuencias del Workaholismo</h2>
+                <div class="consequences">
+                    <div class="consequence-card">
+                        <div class="consequence-icon">🏥</div>
+                        <h4>Salud Física</h4>
+                        <p>Estrés, fatiga crónica, problemas cardíacos</p>
+                    </div>
+                    <div class="consequence-card">
+                        <div class="consequence-icon">🧠</div>
+                        <h4>Salud Mental</h4>
+                        <p>Ansiedad, depresión, burnout</p>
+                    </div>
+                    <div class="consequence-card">
+                        <div class="consequence-icon">💔</div>
+                        <h4>Relaciones</h4>
+                        <p>Deterioro familiar y social</p>
+                    </div>
+                    <div class="consequence-card">
+                        <div class="consequence-icon">📉</div>
+                        <h4>Productividad</h4>
+                        <p>Menor calidad, más errores</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tips">
+                <h3>🌟 Estrategias de Prevención</h3>
+                <div class="tip-list">
+                    <div class="tip-item">
+                        <strong>Establece límites:</strong>
+                        Define horarios específicos para trabajo y descanso
+                    </div>
+                    <div class="tip-item">
+                        <strong>Desconéctate:</strong>
+                        Apaga notificaciones laborales fuera del horario
+                    </div>
+                    <div class="tip-item">
+                        <strong>Delega:</strong>
+                        No trates de hacer todo tú mismo
+                    </div>
+                    <div class="tip-item">
+                        <strong>Practica hobbies:</strong>
+                        Dedica tiempo a actividades no laborales
+                    </div>
+                    <div class="tip-item">
+                        <strong>Busca apoyo:</strong>
+                        Habla con una persona de confianza, CSeH o un profesional si lo necesitas
+                    </div>
+                    <div class="tip-item">
+                        <strong>Programa vacaciones:</strong>
+                        Y respétalas sin trabajar
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentScore = 0;
+        let currentResult = '';
+        
+        function calculateScore() {
+            const checkboxes = document.querySelectorAll('#testQuestions input[type="checkbox"]');
+            currentScore = 0;
+            
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    currentScore++;
+                }
+            });
+            
+            const resultDiv = document.getElementById('scoreResult');
+            const scoreText = document.getElementById('scoreText');
+            const pdfButton = document.getElementById('pdfButton');
+            
+            let message = '';
+            let color = '';
+            
+            if (currentScore <= 2) {
+                message = `Puntuación: ${currentScore}/8 - ✅ BAJO RIESGO<br><br><strong>Recomendaciones:</strong><br>• Mantienes un buen equilibrio vida-trabajo<br>• Continúa con tus hábitos saludables<br>• Sigue estableciendo límites claros<br>• Comparte tus estrategias con compañeros`;
+                color = '#27ae60';
+                currentResult = 'BAJO RIESGO';
+            } else if (currentScore <= 4) {
+                message = `Puntuación: ${currentScore}/8 - ⚠️ RIESGO MODERADO<br><br><strong>Recomendaciones:</strong><br>• Implementa límites más claros entre trabajo y vida personal<br>• Programa tiempo específico para descanso y hobbies<br>• Practica técnicas de desconexión digital<br>• Revisa tu carga de trabajo con tu jefe inmediato`;
+                color = '#f39c12';
+                currentResult = 'RIESGO MODERADO';
+            } else if (currentScore <= 6) {
+                message = `Puntuación: ${currentScore}/8 - 🚨 RIESGO ALTO<br><br><strong>Recomendaciones:</strong><br>• Busca apoyo con una persona de confianza o CSeH para evaluación<br>• Considera terapia o coaching profesional<br>• Implementa cambios inmediatos en tus horarios<br>• Habla con tu familia sobre tu situación<br>• Programa vacaciones obligatorias sin trabajo`;
+                color = '#e74c3c';
+                currentResult = 'RIESGO ALTO';
+            } else {
+                message = `Puntuación: ${currentScore}/8 - 🆘 RIESGO CRÍTICO<br><br><strong>Recomendaciones:</strong><br>• <strong>Contacta a una persona de confianza o CSeH INMEDIATAMENTE</strong><br>• Busca apoyo psicológico profesional urgente<br>• Considera tomar tiempo libre por salud mental<br>• Informa a tu jefe inmediato sobre tu situación<br>• Implementa cambios drásticos en tu rutina laboral`;
+                color = '#c0392b';
+                currentResult = 'RIESGO CRÍTICO';
+            }
+            
+            scoreText.innerHTML = message;
+            resultDiv.style.borderColor = color;
+            resultDiv.style.backgroundColor = color + '20';
+            resultDiv.classList.remove('hidden');
+            pdfButton.style.display = 'block';
+            
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const currentDate = new Date().toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            doc.setFont('helvetica');
+            
+            doc.setFontSize(20);
+            doc.setTextColor(231, 76, 60);
+            doc.text('REPORTE DE EVALUACIÓN WORKAHOLIC', 105, 25, { align: 'center' });
+            
+            doc.setDrawColor(231, 76, 60);
+            doc.setLineWidth(0.5);
+            doc.line(20, 30, 190, 30);
+            
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Fecha de evaluación: ${currentDate}`, 105, 45, { align: 'center' });
+            
+            doc.setFontSize(14);
+            doc.setTextColor(231, 76, 60);
+            doc.text('RESULTADO DE LA EVALUACIÓN:', 20, 65);
+            
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Puntuación obtenida: ${currentScore} de 8 puntos`, 20, 75);
+            doc.text(`Nivel de riesgo: ${currentResult}`, 20, 82);
+            
+            doc.setFontSize(11);
+            doc.text('RESPUESTAS SELECCIONADAS:', 20, 98);
+            
+            const questions = [
+                'Trabajo más horas de las requeridas habitualmente',
+                'Me resulta difícil relajarme cuando no estoy trabajando',
+                'Prefiero trabajar que socializar con amigos o familia',
+                'Me siento culpable cuando tomo descansos',
+                'Reviso emails de trabajo fuera del horario laboral',
+                'Mi familia se queja de que trabajo demasiado',
+                'Tengo dificultad para delegar tareas',
+                'Uso el trabajo para evitar pensar en problemas personales'
+            ];
+            
+            let yPosition = 108;
+            doc.setFontSize(9);
+            
+            questions.forEach((question, index) => {
+                const checkbox = document.getElementById(`q${index + 1}`);
+                const isChecked = checkbox.checked ? '☑' : '☐';
+                
+                const lines = doc.splitTextToSize(`${isChecked} ${question}`, 170);
+                lines.forEach(line => {
+                    if (yPosition > 270) {
+                        doc.addPage();
+                        yPosition = 20;
+                    }
+                    doc.text(line, 20, yPosition);
+                    yPosition += 5;
+                });
+                yPosition += 2;
+            });
+            
+            if (yPosition > 220) {
+                doc.addPage();
+                yPosition = 20;
+            }
+            
+            doc.setFontSize(12);
+            doc.setTextColor(231, 76, 60);
+            doc.text('RECOMENDACIONES:', 20, yPosition + 10);
+            
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+            yPosition += 20;
+            
+            let recommendations = [];
+            
+            if (currentScore <= 2) {
+                recommendations = [
+                    '• Mantienes un buen equilibrio vida-trabajo',
+                    '• Continúa con tus hábitos saludables',
+                    '• Sigue estableciendo límites claros',
+                    '• Comparte tus estrategias con compañeros'
+                ];
+            } else if (currentScore <= 4) {
+                recommendations = [
+                    '• Implementa límites más claros entre trabajo y vida personal',
+                    '• Programa tiempo específico para descanso y hobbies',
+                    '• Practica técnicas de desconexión digital',
+                    '• Revisa tu carga de trabajo con tu jefe inmediato'
+                ];
+            } else if (currentScore <= 6) {
+                recommendations = [
+                    '• Busca apoyo con una persona de confianza o CSeH para evaluación',
+                    '• Considera terapia o coaching profesional',
+                    '• Implementa cambios inmediatos en tus horarios',
+                    '• Habla con tu familia sobre tu situación',
+                    '• Programa vacaciones obligatorias sin trabajo'
+                ];
+            } else {
+                recommendations = [
+                    '• CONTACTA A UNA PERSONA DE CONFIANZA O CSeH INMEDIATAMENTE',
+                    '• Busca apoyo psicológico profesional urgente',
+                    '• Considera tomar tiempo libre por salud mental',
+                    '• Informa a tu jefe inmediato sobre tu situación',
+                    '• Implementa cambios drásticos en tu rutina laboral'
+                ];
+            }
+            
+            recommendations.forEach(rec => {
+                if (yPosition > 270) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                const lines = doc.splitTextToSize(rec, 170);
+                lines.forEach(line => {
+                    doc.text(line, 20, yPosition);
+                    yPosition += 5;
+                });
+                yPosition += 2;
+            });
+            
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(128, 128, 128);
+                doc.text(`Página ${i} de ${pageCount}`, 105, 290, { align: 'center' });
+                doc.text('Reporte personal de autodiagnóstico', 105, 285, { align: 'center' });
+            }
+            
+            const currentDateFile = new Date().toISOString().split('T')[0];
+            const fileName = `Evaluacion_Workaholic_${currentDateFile}.pdf`;
+            doc.save(fileName);
+        }
+    </script>
+</body>
+</html>
